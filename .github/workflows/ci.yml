@@ -3,7 +3,7 @@ name: CI Workflow
 on:
   push:
     branches:
-      - main  # workflow срабатывает на пуш в ветку main
+      - main
 
 jobs:
   security_check:
@@ -12,12 +12,12 @@ jobs:
 
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4  # Проверяем код из репозитория
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # Указываем нужную версию Python
+          python-version: '3.12.2'
 
       - name: Install Bandit
         run: |
@@ -30,16 +30,16 @@ jobs:
   openapi_generation:
     name: Generate OpenAPI Documentation
     runs-on: ubuntu-latest
-    needs: security_check  # Этот шаг зависит от завершения предыдущего шага)
+    needs: security_check
 
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4  # Проверяем код
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'  # Указываем нужную версию Python
+          python-version: '3.12.2'
 
       - name: Install Dependencies
         run: |
@@ -51,7 +51,7 @@ jobs:
           flask run --host=0.0.0.0 --port=5000 --debug &  # Запускаем сервер в фоне с флагом debug
 
       - name: Wait for Flask to start
-        run: sleep 10  # Увеличиваем время ожидания, чтобы сервер успел запуститься
+        run: sleep 10
 
       - name: Generate OpenAPI Specification (openapi.yaml)
         run: |
@@ -64,46 +64,46 @@ jobs:
       - name: Upload OpenAPI Spec as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: openapi-spec  # Загрузка OpenAPI спецификации как артефакт
-          path: openapi.yaml  # Путь к сгенерированному файлу openapi.yaml
+          name: openapi-spec
+          path: openapi.yaml
 
   redoc_generation:
     name: Generate ReDoc Page
     runs-on: ubuntu-latest
-    needs: openapi_generation  # Этот шаг зависит от завершения предыдущего шага
+    needs: openapi_generation
 
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4  # Проверяем код
+        uses: actions/checkout@v4
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'  # Устанавливаем Node.js для работы с redocly
+          node-version: '18'
 
       - name: Install redocly
         run: |
-          npm install -g @redocly/cli@latest  # Устанавливаем redocly
+          npm install -g @redocly/cli@latest  
 
       - name: Check if openapi.yaml exists
         run: |
-          ls -la openapi.yaml  # Проверяем, что файл openapi.yaml существует перед генерацией
+          ls -la openapi.yaml
 
       - name: Generate ReDoc HTML
         run: |
-          redocly build-docs openapi.yaml --output docs/index.html  # Генерируем страницу документации ReDoc
+          redocly build-docs openapi.yaml --output docs/index.html
 
   deploy_to_pages:
     name: Deploy Documentation to GitHub Pages
     runs-on: ubuntu-latest
-    needs: redoc_generation  # Этот шаг зависит от завершения предыдущего шага
+    needs: redoc_generation 
 
     steps:
       - name: Check out the code
-        uses: actions/checkout@v4  # Проверяем код
+        uses: actions/checkout@v4
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs  # Директория, куда загружается документация
+          publish_dir: ./docs

@@ -9,7 +9,7 @@ swagger = Swagger(app)
 # Папка для хранения swagger.json
 swagger_files_dir = 'swagger_files'
 
-# Убедитесь, что папка существует
+# Проверка на существование папки
 if not os.path.exists(swagger_files_dir):
     os.makedirs(swagger_files_dir)
 
