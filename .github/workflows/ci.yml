@@ -84,10 +84,6 @@ jobs:
         run: |
           npm install -g @redocly/cli@latest  
 
-      - name: Check if openapi.yaml exists
-        run: |
-          ls -la openapi.yaml
-
       - name: Generate ReDoc HTML
         run: |
           redocly build-docs openapi.yaml --output docs/index.html
